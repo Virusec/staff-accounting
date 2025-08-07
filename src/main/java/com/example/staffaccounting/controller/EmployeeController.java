@@ -52,12 +52,12 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.findEmployeeByIdOrThrow(id));
     }
 
-    @GetMapping("/projection/{lastName}")
+    @GetMapping("/projection/lastName/{lastName}")
     public ResponseEntity<List<EmployeeProjection>> findProjectionsByLastName(@PathVariable String lastName) {
         return ResponseEntity.ok(employeeService.findByLastName(lastName));
     }
 
-    @GetMapping("/projection")
+    @GetMapping("/projection/all")
     public ResponseEntity<List<EmployeeProjection>> findAllProjections() {
         return ResponseEntity.ok(employeeService.findAllProjections());
     }

@@ -11,7 +11,7 @@ import org.mapstruct.MappingTarget;
  */
 @Mapper(componentModel = "spring")
 public interface DepartmentMapper {
-//    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", ignore = true)
     Department toEntity(DepartmentRequest departmentRequest);
 
     void updateDepartmentFromDepartmentRequest(DepartmentRequest departmentRequest, @MappingTarget Department department);

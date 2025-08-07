@@ -12,11 +12,11 @@ import org.mapstruct.MappingTarget;
  */
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
-//    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id", ignore = true)
     Employee toEntity(EmployeeRequest employeeRequest, Department department);
 
-//    @Mapping(target = "id", ignore = true)
-//    @Mapping(source = "department", target = "department")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "department", target = "department")
     void updateEmployeeFromEmployeeRequest(
             EmployeeRequest employeeRequest,
             @MappingTarget Employee employee,
