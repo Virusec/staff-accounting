@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,12 +30,14 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('MODERATOR','SUPER_ADMIN')")
     public ResponseEntity<Department> createDepartment(@Valid @RequestBody DepartmentRequest departmentRequest) {
         Department created = departmentService.createDepartment(departmentRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('MODERATOR','SUPER_ADMIN')")
     public ResponseEntity<Department> updateDepartment(
             @PathVariable Long id,
             @Valid @RequestBody DepartmentRequest departmentRequest
@@ -43,17 +46,20 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','MODERATOR','SUPER_ADMIN')")
     public ResponseEntity<Department> findDepartmentById(@PathVariable Long id) {
         return ResponseEntity.ok(departmentService.findDepartmentByIdOrThrow(id));
     }
 
     @GetMapping("/projections")
+    @PreAuthorize("hasAnyRole('USER','MODERATOR','SUPER_ADMIN')")
     public ResponseEntity<List<DepartmentProjection>> findAllDepartmentProjections() {
         return ResponseEntity.ok(departmentService.findAllDepartmentProjections());
     }
