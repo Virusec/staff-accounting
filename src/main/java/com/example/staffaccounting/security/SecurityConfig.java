@@ -2,14 +2,11 @@ package com.example.staffaccounting.security;
 
 import com.example.staffaccounting.security.filter.JwtAuthenticationFilter;
 import com.example.staffaccounting.security.filter.LoggingFilter;
-import com.example.staffaccounting.security.service.OurUserDetailedService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,23 +24,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
 /**
  * @author Anatoliy Shikin
  */
+@EnableMethodSecurity(securedEnabled = true)
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final OurUserDetailedService ourUserDetailedService;
+//    private final OurUserDetailedService ourUserDetailedService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LoggingFilter loggingFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        RequestMatcher csrfIgnoreDepartmentsCreate = (HttpServletRequest request) ->
-//                "POST".equals(request.getMethod()) && "/departments/create".equals(request.getRequestURI());
-//                .headers(h -> h
-//                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-//                .csrf(c -> c.ignoringRequestMatchers(
-//                        PathRequest.toH2Console(),
-//                        csrfIgnoreDepartmentsCreate
-//                ))
         http
                 .headers(h -> h
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
@@ -61,40 +51,23 @@ public class SecurityConfig {
                 )
                 .redirectToHttps(withDefaults()) // редирект HTTP->HTTPS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/refresh", "/actuator/health", "/error").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh", "/actuator/health", "/error", "/auth/seed").permitAll()
                         .anyRequest().authenticated()
                 )
-                .authenticationProvider(authenticationProvider())
+//                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults());
-//                .authorizeHttpRequests(requests -> requests
-//                        .requestMatchers(PathRequest.toH2Console()).permitAll()
-//                        .requestMatchers("/departments/create").permitAll()
-//                        .anyRequest().authenticated()
-//                );
         return http.build();
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(ourUserDetailedService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
-
-
 //    @Bean
-//    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-//        var userDetailsService = new InMemoryUserDetailsManager();
-//        userDetailsService.createUser(
-//                User.withUsername("admin")
-//                        .password(passwordEncoder.encode("admin"))
-//                        .roles("ADMIN")
-//                        .build()
-//        );
-//        return userDetailsService;
+//    public AuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(ourUserDetailedService);
+//        provider.setPasswordEncoder(passwordEncoder());
+//        return provider;
 //    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
