@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -28,10 +29,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Profile("jwt")
 public class SecurityConfig {
-//    private final OurUserDetailedService ourUserDetailedService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LoggingFilter loggingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -44,29 +46,23 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(
                                 (request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":\"UNAUTHORIZED\"}");
-                        })
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write("{\"error\":\"UNAUTHORIZED\"}");
+                                })
                 )
-                .redirectToHttps(withDefaults()) // редирект HTTP->HTTPS
+                .redirectToHttps(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/refresh", "/actuator/health", "/error", "/auth/seed").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/seed",
+                                "/actuator/health", "/error")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults());
         return http.build();
     }
-
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(ourUserDetailedService);
-//        provider.setPasswordEncoder(passwordEncoder());
-//        return provider;
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

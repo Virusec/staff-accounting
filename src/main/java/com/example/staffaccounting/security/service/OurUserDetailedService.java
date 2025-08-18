@@ -32,8 +32,4 @@ public class OurUserDetailedService implements UserDetailsService {
                 .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + appUser.getRole().name())))
                 .build();
     }
-//    public void createNewUser(AppUser appUser) {
-//        appUser.setRole(appUser.getRole());
-//        userRepository.save(appUser);
-//    }
 }

@@ -1,17 +1,21 @@
 package com.example.staffaccounting.security.controller;
 
-import com.example.staffaccounting.security.dto.AuthRequest;
-import com.example.staffaccounting.security.dto.TokenResponse;
+import com.example.staffaccounting.security.model.dictionary.Role;
+import com.example.staffaccounting.security.model.dto.AuthRequest;
+import com.example.staffaccounting.security.model.dto.TokenResponse;
 import com.example.staffaccounting.security.model.AppUser;
 import com.example.staffaccounting.security.repository.UserRepository;
 import com.example.staffaccounting.security.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,12 +24,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * @author Anatoliy Shikin
  */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Profile("jwt")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -49,62 +56,67 @@ public class AuthController {
             String refresh = jwtUtils.generateRefreshToken(principal);
             return ResponseEntity.ok(new TokenResponse(access, accessExpMs, refresh, refreshExpMs));
         } catch (BadCredentialsException e) {
-            // инкремент делается через listener (ниже), здесь 401
-            return ResponseEntity.status(401).body("Bad credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Bad credentials"));
         }
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body("No refresh token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "No refresh token"));
         }
         String token = authHeader.substring(7);
         if (!jwtUtils.isRefreshToken(token) || jwtUtils.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body("Invalid refresh token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid refresh token"));
         }
         String username = jwtUtils.extractUsername(token);
         UserDetails user = userRepository.findByUsername(username)
-                .map(u -> org.springframework.security.core.userdetails.User.withUsername(u.getUsername())
+                .map(u -> User.withUsername(u.getUsername())
                         .password(u.getPassword())
                         .accountLocked(!u.isAccountNonLocked())
                         .authorities("ROLE_" + u.getRole().name())
                         .build())
                 .orElse(null);
         if (user == null || !user.isAccountNonLocked()) {
-            return ResponseEntity.status(401).body("User locked or not found");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User locked or not found"));
         }
         String access = jwtUtils.generateToken(user);
         return ResponseEntity.ok(new TokenResponse(access, accessExpMs, null, 0));
     }
 
-    // для создания тестовых юзеров
     @PostMapping("/seed")
     public ResponseEntity<?> seed() {
         if (userRepository.findByUsername("user").isEmpty()) {
-            userRepository.save(AppUser.builder().username("user")
+            userRepository.save(AppUser.builder()
+                    .username("user")
                     .password(passwordEncoder.encode("password"))
-                    .role(com.example.staffaccounting.security.dictionary.Role.USER)
-                    .isAccountNonLocked(true)
+                    .role(Role.USER)
+                    .accountNonLocked(true)
                     .failedAttempts(0)
                     .build());
         }
-        if (userRepository.findByUsername("mod").isEmpty()) {
-            userRepository.save(AppUser.builder().username("mod")
+        if (userRepository.findByUsername("moderator").isEmpty()) {
+            userRepository.save(AppUser.builder()
+                    .username("moderator")
                     .password(passwordEncoder.encode("password"))
-                    .role(com.example.staffaccounting.security.dictionary.Role.MODERATOR)
-                    .isAccountNonLocked(true)
+                    .role(Role.MODERATOR)
+                    .accountNonLocked(true)
                     .failedAttempts(0)
                     .build());
         }
         if (userRepository.findByUsername("admin").isEmpty()) {
-            userRepository.save(AppUser.builder().username("admin")
+            userRepository.save(AppUser.builder()
+                    .username("admin")
                     .password(passwordEncoder.encode("password"))
-                    .role(com.example.staffaccounting.security.dictionary.Role.SUPER_ADMIN)
-                    .isAccountNonLocked(true)
+                    .role(Role.SUPER_ADMIN)
+                    .accountNonLocked(true)
                     .failedAttempts(0)
                     .build());
         }
-        return ResponseEntity.ok("Seeded");
+        return ResponseEntity.ok("Ok");
     }
 }
