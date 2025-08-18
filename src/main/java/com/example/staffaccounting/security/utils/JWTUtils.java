@@ -29,7 +29,7 @@ public class JWTUtils {
             @Value("${security.jwt.access-exp-ms}") long accessExpirationTimeMs,
             @Value("${security.jwt.refresh-exp-ms}") long refreshExpirationTimeMs
     ) {
-        byte[] keyBytes = Base64.getDecoder().decode(secretBase64);/*Decoders.BASE64.decode(secretBase64)*/
+        byte[] keyBytes = Base64.getDecoder().decode(secretBase64);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.accessExpirationTimeMs = accessExpirationTimeMs;
         this.refreshExpirationTimeMs = refreshExpirationTimeMs;

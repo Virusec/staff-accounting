@@ -1,4 +1,4 @@
-package com.example.staffaccounting.security.dictionary;
+package com.example.staffaccounting.security.model.dictionary;
 
 /**
  * @author Anatoliy Shikin

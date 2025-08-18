@@ -1,6 +1,6 @@
 package com.example.staffaccounting.security.model;
 
-import com.example.staffaccounting.security.dictionary.Role;
+import com.example.staffaccounting.security.model.dictionary.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,8 +36,8 @@ public class AppUser {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
-    @Column(name = "is_account_non_blocked", nullable = false)
-    private boolean isAccountNonLocked = true;
+    @Column(name = "account_non_blocked", nullable = false)
+    private boolean accountNonLocked = true;
     @Column(name = "failed_attempts", nullable = false)
     private int failedAttempts = 0;
 }

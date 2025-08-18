@@ -29,9 +29,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-//    private final OurUserDetailedService ourUserDetailedService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LoggingFilter loggingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -44,29 +44,27 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(
                                 (request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":\"UNAUTHORIZED\"}");
-                        })
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write("{\"error\":\"UNAUTHORIZED\"}");
+                                })
                 )
-                .redirectToHttps(withDefaults()) // редирект HTTP->HTTPS
+                .redirectToHttps(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/refresh", "/actuator/health", "/error", "/auth/seed").permitAll()
+                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/seed",
+//                                "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**",
+                                "/actuator/health", "/error")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .authenticationProvider(authenticationProvider())
+//                .oauth2Login(oauth->oauth
+//                        .userInfoEndpoint(u->u.userService(oAuth2UserService))
+//                        .successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults());
         return http.build();
     }
-
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(ourUserDetailedService);
-//        provider.setPasswordEncoder(passwordEncoder());
-//        return provider;
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

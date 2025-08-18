@@ -1,4 +1,4 @@
-package com.example.staffaccounting.security.dto;
+package com.example.staffaccounting.security.model.dto;
 
 /**
  * @author Anatoliy Shikin
