@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminController {
     private final UserRepository userRepository;
+
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @PostMapping("/{username}/unlock")
     public ResponseEntity<?> unlock(@PathVariable String username) {
@@ -25,7 +26,7 @@ public class AdminController {
                     u.setAccountNonLocked(true);
                     u.setFailedAttempts(0);
                     userRepository.save(u);
-                    return ResponseEntity.ok().body(java.util.Map.of("status","unlocked","user", username));
+                    return ResponseEntity.ok().body(java.util.Map.of("status", "unlocked", "user", username));
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

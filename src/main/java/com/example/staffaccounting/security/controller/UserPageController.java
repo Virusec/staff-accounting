@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class UserPageController {
     @GetMapping("/")
-    public String index() { return "index"; }
+    public String index() {
+        return "index";
+    }
 
     @GetMapping("/user")
     public String user(@AuthenticationPrincipal OAuth2User principal, Model model) {

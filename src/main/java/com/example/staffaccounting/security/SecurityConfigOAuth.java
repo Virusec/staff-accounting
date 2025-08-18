@@ -41,7 +41,7 @@ public class SecurityConfigOAuth {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
-                .authorizeHttpRequests(authorizeRequests  -> authorizeRequests
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/", "/login", "/error", "/webjars/**").permitAll()
                         .requestMatchers("/h2-console/*").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
