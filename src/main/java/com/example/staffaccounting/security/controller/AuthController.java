@@ -8,6 +8,7 @@ import com.example.staffaccounting.security.repository.UserRepository;
 import com.example.staffaccounting.security.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Profile("jwt")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -86,7 +88,6 @@ public class AuthController {
         return ResponseEntity.ok(new TokenResponse(access, accessExpMs, null, 0));
     }
 
-    // для создания тестовых юзеров
     @PostMapping("/seed")
     public ResponseEntity<?> seed() {
         if (userRepository.findByUsername("user").isEmpty()) {

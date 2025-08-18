@@ -6,5 +6,6 @@ package com.example.staffaccounting.security.model.dictionary;
 public enum Role {
     USER,
     MODERATOR,
-    SUPER_ADMIN
+    SUPER_ADMIN,
+    ADMIN
 }

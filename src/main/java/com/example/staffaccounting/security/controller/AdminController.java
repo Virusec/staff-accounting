@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminController {
     private final UserRepository userRepository;
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @PostMapping("/{username}/unlock")
     public ResponseEntity<?> unlock(@PathVariable String username) {
         return userRepository.findByUsername(username)

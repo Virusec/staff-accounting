@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -28,6 +29,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Profile("jwt")
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LoggingFilter loggingFilter;
@@ -52,14 +54,10 @@ public class SecurityConfig {
                 .redirectToHttps(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/refresh", "/auth/seed",
-//                                "/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**",
                                 "/actuator/health", "/error")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-//                .oauth2Login(oauth->oauth
-//                        .userInfoEndpoint(u->u.userService(oAuth2UserService))
-//                        .successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(withDefaults());
